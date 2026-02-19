@@ -2,7 +2,7 @@ import re
 import json
 
 
-def extract_patterns_to_json(input_file, output_file, patterns, from_bottom=False):
+def extract_patterns_to_json(input_file, output_file, patterns, from_bottom=False, allow_missing=True):
     """
     Extract values from a file by matching ordered regex patterns and write results to JSON.
 
@@ -57,7 +57,7 @@ def extract_patterns_to_json(input_file, output_file, patterns, from_bottom=Fals
                 results[key] = m.group(1) if m.lastindex else m.group(0)
                 matched = True
                 break
-        if not matched:
+        if not matched and not allow_missing:
             raise ValueError(
                 f"Pattern for key '{key}' ({regexp.pattern!r}) "
                 f"had no match in '{input_file}'"
