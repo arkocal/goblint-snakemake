@@ -1,3 +1,11 @@
-samples:
-  - input1
-  - input2
+benchmark_dir: "/home/arkocal/Workspace/goblint/bench/"
+benchmarks:
+  cksum: "coreutils/cksum_comb.c"
+  cut: "coreutils/cut_comb.c"
+
+configs:
+  fwd: "--solver fwd"
+  bu: "--solver bu"
+
+goblint: "goblint"
+goblint_dir: "/home/arkocal/Workspace/goblint/fwd_rework"
