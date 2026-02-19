@@ -17,6 +17,18 @@ GOBLINT_DIR = config["goblint_dir"]
 rule all:
 	input: "out/summary.csv"
 
+rule aggregate_incomplete_csv:
+    input:
+        lambda wildcards: [
+            f for f in expand("out/rows/{id}_{conf}.csv", id=IDS, conf=CONFIG_IDS)
+            if Path(f).exists()
+        ]
+    output:
+        "out/summary_incomplete.csv"
+    run:
+        pd.concat([pd.read_csv(f) for f in input], ignore_index=True)\
+          .to_csv(output[0], index=False)
+
 rule aggregate_csv:
     input:
         expand("out/rows/{id}_{conf}.csv", id=IDS, conf=CONFIG_IDS)
