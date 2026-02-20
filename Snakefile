@@ -64,6 +64,8 @@ rule extract_csv:
             ("solver_end",  r"Solver end:\s*(\d+)"),
         ])
         status.update(details)
+        status["id"] = wildcards.id
+        status["conf"] = wildcards.conf
         df = pd.DataFrame([status])
         df.to_csv(output[0], index=False)
 
