@@ -8,6 +8,8 @@ BENCHMARK_DIR = config["benchmark_dir"]
 BENCH = config["benchmarks"]
 IDS = BENCH.keys()
 
+TIMEOUT = config["timeout"]
+
 GOBLINT_CONFIGS = config["configs"]
 CONFIG_IDS = GOBLINT_CONFIGS.keys()
 
@@ -71,7 +73,7 @@ rule compute:
     output:
         ["out/{id}_{conf}.out", "out/{id}_{conf}_status.json"]
     params:
-        timeout=2
+        timeout=TIMEOUT
     benchmark:
         "out/benchmarks/{id}_{conf}.txt"
     wrapper:
