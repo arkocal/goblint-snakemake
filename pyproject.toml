@@ -5,6 +5,7 @@ description = "My experimental project for learning snakemake"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "filelock>=3.24.3",
     "pandas>=3.0.1",
     "snakemake>=9.16.3",
     "snakemake-logger-plugin-snkmt>=0.1.6",
