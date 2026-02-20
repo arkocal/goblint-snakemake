@@ -15,7 +15,7 @@ goblint_executable = (sm.config["goblint_dir"]
                       + "/" + sm.config["goblint"]
                       ) 
 
-goblint_config = sm.config["configs"][sm.wildcards.conf]
+goblint_config = sm.params.get("config", "")
 timeout = sm.params.get("timeout", None)
 
 with tempfile.TemporaryDirectory() as tmpdir:
