@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from helpers import *
 import pandas as pd
+import json
 
 
 BENCHMARK_DIR = config["benchmark_dir"]
@@ -38,35 +38,41 @@ rule aggregate_csv:
         pd.concat([pd.read_csv(f) for f in input], ignore_index=True)\
           .to_csv(output[0], index=False)
 
-rule json_to_row:
+rule extract_csv:
     input:
-        "out/json/{id}_{conf}.json"
+        ["out/{id}_{conf}.out", "out/{id}_{conf}_status.json"]
     output:
         "out/rows/{id}_{conf}.csv"
     run:
-        df = pd.read_json(input[0], typ="series", convert_dates=False).to_frame().T
-        df["id"], df["conf"] = wildcards.id, wildcards.conf  # wildcards available here!
+        def extract_patterns(input_file, patterns):
+            """Return a dictionary containing the first match of each pattern in the input file.  """
+            matches = {pattern[0]: None for pattern in patterns}
+            with open(input_file, "r") as f:
+                for line in f:
+                    for pattern in patterns:
+                        match = re.search(pattern[1], line)
+                        if match:
+                            matches[pattern[0]] = match.group(1)
+                            patterns.remove(pattern)
+            return matches
+        with open(input[1]) as f:
+            status = json.load(f)
+        details = extract_patterns(input[0], patterns=[
+            ("solver_start",  r"Solver start:\s*(\d+)"),
+            ("solver_end",  r"Solver end:\s*(\d+)"),
+        ])
+        status.update(details)
+        df = pd.DataFrame([status])
         df.to_csv(output[0], index=False)
 
-rule extract_json:
-        input:
-                out="out/{id}_{conf}.out"
-        output:
-                "out/json/{id}_{conf}.json"
-        run:
-                extract_patterns_to_json(
-                        input[0], output[0],
-                        patterns=[
-                                ("solver_start",  r"Solver start:\s*(\d+)"),
-                                ("solver_end",  r"Solver end:\s*(\d+)"),
-                        ]
-                )
 rule compute:
-	input: 
-		lambda wc: Path(BENCHMARK_DIR) / BENCH[wc.id]
-	output:
-		"out/{id}_{conf}.out"
-	benchmark:
-		"out/benchmarks/{id}_{conf}.txt"
-	wrapper:
-		"file:wrappers/goblint"
+    input: 
+        lambda wc: Path(BENCHMARK_DIR) / BENCH[wc.id]
+    output:
+        ["out/{id}_{conf}.out", "out/{id}_{conf}_status.json"]
+    params:
+        timeout=2
+    benchmark:
+        "out/benchmarks/{id}_{conf}.txt"
+    wrapper:
+        "file:wrappers/goblint"
