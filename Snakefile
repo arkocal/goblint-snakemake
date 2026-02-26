@@ -19,6 +19,7 @@ CONFIG_IDS = GOBLINT_CONFIGS.keys()
 
 GOBLINT = config["goblint"]
 GOBLINT_DIR = config["goblint_dir"]
+GOBLINT_CONFIG = config.get("goblint_config")
 
 SUMMARY_INCOMPLETE = "out/summary_incomplete.csv"
 
@@ -158,7 +159,10 @@ rule compare:
         ["out/{id}_{pair}.out", "out/{id}_{pair}_status.json"]
     params:
         timeout=TIMEOUT,
-        config=lambda wc: "--solver " + wc.pair.split("-")[0] + " --comparesolver " + wc.pair.split("-")[1]
+        config=lambda wc: (
+                (f"--conf {GOBLINT_CONFIG} " if GOBLINT_CONFIG else "") +
+                "--solver " + wc.pair.split("-")[0] + " --comparesolver " + wc.pair.split("-")[1]
+        )
     benchmark:
         "out/benchmarks/{id}_{pair}.txt"
     wrapper:
